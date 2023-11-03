@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface EmployeeService {
 
-    List<EmployeeDTO> findAllEmployees();
+    List<EmployeeDTO> findAllEmployees(String token);
 
     Optional<Employee> findEmployeeById(long id);
 

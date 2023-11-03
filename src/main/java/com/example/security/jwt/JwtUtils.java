@@ -38,12 +38,12 @@ public class JwtUtils {
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
     Map<String, Object> claims = new HashMap<>();
-    claims.put("username", userPrincipal.getUsername());
     claims.put("firstName", userPrincipal.getFirstName());
     claims.put("lastName", userPrincipal.getLastName());
 
     return Jwts.builder()
         .setClaims(claims)
+        .setSubject(userPrincipal.getUsername())
         .setIssuedAt(new Date())
         .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
         .signWith(key(), SignatureAlgorithm.HS384)
@@ -55,8 +55,18 @@ public class JwtUtils {
   }
 
   public String getUserNameFromJwtToken(String token) {
-    return Jwts.parserBuilder().setSigningKey(key()).build()
-               .parseClaimsJws(token).getBody().getSubject();
+    try {
+      Claims claims = Jwts.parser()
+              .setSigningKey(jwtSecret)
+              .parseClaimsJws(token)
+              .getBody();
+
+      // Extract the username from the claims
+      return claims.getSubject();
+    } catch (Exception e) {
+      // Handle any exceptions, such as expired or invalid tokens
+      return null;
+    }
   }
 
   public boolean validateJwtToken(String authToken) {

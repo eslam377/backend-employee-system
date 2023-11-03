@@ -26,9 +26,9 @@ public class EmployeeController {
 
 
     @GetMapping("/employees")
-    public ResponseEntity<?> findAllEmployee(){
+    public ResponseEntity<?> findAllEmployee(@RequestHeader("Authorization") String token){
         try {
-            List<EmployeeDTO> employeeDTOs = employeeService.findAllEmployees();
+            List<EmployeeDTO> employeeDTOs = employeeService.findAllEmployees(token);
             return new ResponseEntity<>(employeeDTOs ,HttpStatus.OK);
         }catch (Exception ex){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

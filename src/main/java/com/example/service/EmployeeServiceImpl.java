@@ -10,7 +10,11 @@ import com.example.mapper.CustomModelMapper;
 import com.example.repository.DepartmentRepository;
 import com.example.repository.EmployeeRepository;
 import com.example.repository.JobRepository;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository ;
@@ -26,13 +31,26 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final DepartmentRepository departmentRepository	;
 
+    @Value("${bezkoder.app.jwtSecret}${bezkoder.app.jwtSecret}")
+    private String jwtSecret;
+
     @Override
-    public List<EmployeeDTO> findAllEmployees() {
+    public List<EmployeeDTO> findAllEmployees(String token) {
 
         List<Employee> employees = employeeRepository.findAll();
 
         List<EmployeeDTO> employeeDTOs =
                 CustomModelMapper.mapAll(employees,EmployeeDTO.class);
+
+        String jwtToken = token.substring(7);
+
+
+        Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwtToken).getBody();
+
+        String firstName = claims.get("firstName", String.class);
+        String lastName = claims.get("lastName", String.class);
+
+        log.info("User FirstName: " + firstName + ", LastName: " + lastName);
 
         return employeeDTOs;
     }
