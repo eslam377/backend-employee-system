@@ -2,10 +2,16 @@ package com.example.security.jwt;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.example.repository.UserRepository;
 import com.example.security.services.UserDetailsImpl;
+import com.example.security.services.UserDetailsServiceImpl;
+import com.example.security.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -24,12 +30,20 @@ public class JwtUtils {
   @Value("${bezkoder.app.jwtExpirationMs}")
   private int jwtExpirationMs;
 
+  @Autowired
+  UserDetailsServiceImpl userDetailsService ;
+
   public String generateJwtToken(Authentication authentication) {
 
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
+    Map<String, Object> claims = new HashMap<>();
+    claims.put("username", userPrincipal.getUsername());
+    claims.put("firstName", userPrincipal.getFirstName());
+    claims.put("lastName", userPrincipal.getLastName());
+
     return Jwts.builder()
-        .setSubject((userPrincipal.getUsername()))
+        .setClaims(claims)
         .setIssuedAt(new Date())
         .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
         .signWith(key(), SignatureAlgorithm.HS384)

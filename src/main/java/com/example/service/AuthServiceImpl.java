@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.payload.request.LoginRequest;
 import com.example.payload.response.JwtResponse;
+import com.example.repository.UserRepository;
 import com.example.security.jwt.JwtUtils;
 import com.example.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
