@@ -12,6 +12,8 @@ import com.example.repository.EmployeeRepository;
 import com.example.repository.JobRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,14 +40,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<EmployeeDTO> findAllEmployees(String token) {
 
         List<Employee> employees = employeeRepository.findAll();
-
-        List<EmployeeDTO> employeeDTOs =
-                CustomModelMapper.mapAll(employees,EmployeeDTO.class);
+        List<EmployeeDTO> employeeDTOs = CustomModelMapper.mapAll(employees,EmployeeDTO.class);
 
         String jwtToken = token.substring(7);
 
-
-        Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwtToken).getBody();
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtToken)))
+                .build()
+                .parseClaimsJws(jwtToken)
+                .getBody();
 
         String firstName = claims.get("firstName", String.class);
         String lastName = claims.get("lastName", String.class);
